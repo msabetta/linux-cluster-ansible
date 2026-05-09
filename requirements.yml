@@ -8,6 +8,6 @@ collections:
   - name: community.mysql
     version: "4.0.0"
   - name: community.haproxy
-    version: "*"
+    version: "1.0.0"
   - name: community.monitoring
     version: "0.14.0"
