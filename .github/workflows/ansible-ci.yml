@@ -1,13 +1,38 @@
 name: Ansible CI
-on: [push, pull_request]
+
+on:
+  push:
+  pull_request:
+
 jobs:
   lint-test:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Install Ansible
-        run: pip install ansible ansible-lint
-      - name: Lint
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Ansible and ansible-lint
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible ansible-lint
+
+      - name: Install Ansible collections
+        run: |
+          ansible-galaxy collection install --pre -r requirements.yml
+
+      - name: Run ansible-lint
         run: ansible-lint
-      - name: Syntax check
-        run: ansible-playbook playbooks/site.yml --syntax-check
+
+      - name: Ansible syntax check
+        run: |
+          ansible-playbook playbooks/site.yml --syntax-check
+
+      - name: Dry run with check mode
+        run: |
+          ansible-playbook playbooks/site.yml --check
