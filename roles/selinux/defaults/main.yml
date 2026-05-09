@@ -1,0 +1,6 @@
+---
+selinux_mode: enforcing
+selinux_policy: targeted
+selinux_booleans:
+  - haproxy_connect_any
+  - httpd_can_network_connect

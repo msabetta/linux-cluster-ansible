@@ -1,0 +1,13 @@
+haproxy_frontend_port: 443
+haproxy_stats_port: 8404
+haproxy_backends:
+  web:
+    balance: roundrobin
+    health_check: httpchk
+    servers:
+      - name: app01
+        host: 192.168.1.20
+        port: 80
+      - name: app02
+        host: 192.168.1.21
+        port: 80

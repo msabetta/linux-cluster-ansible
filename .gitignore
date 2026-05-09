@@ -1,0 +1,48 @@
+# Ansible
+*.retry
+ansible.log
+.vault_pass
+
+# SSH Keys (Security Sensitive)
+roles/ssh/files/ssh-keys/ansible_ed25519
+roles/ssh/files/ssh-keys/*
+!roles/ssh/files/ssh-keys/*.pub
+
+# Collections and Roles (if installed locally)
+collections/ansible_collections/
+roles/external/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+bin/
+lib/
+develop-eggs/
+dist/
+eggs/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo

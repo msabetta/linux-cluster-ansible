@@ -1,0 +1,53 @@
+- name: Install firewalld
+  ansible.builtin.yum:
+    name: firewalld
+    state: present
+
+- name: Enable firewalld
+  ansible.builtin.systemd:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: Set default zone
+  ansible.posix.firewalld:
+    zone: public
+    state: present
+    permanent: true
+    immediate: true
+
+- name: Allow SSH from specific IPs
+  ansible.posix.firewalld:
+    source: "{{ item }}"
+    port: "{{ ssh_port }}/tcp"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop: "{{ firewall_ssh_allow_ips }}"
+  when: firewall_ssh_allow_ips is defined and firewall_ssh_allow_ips | length > 0
+
+- name: Allow SSH from everywhere (if no specific IPs defined)
+  ansible.posix.firewalld:
+    port: "{{ ssh_port }}/tcp"
+    permanent: true
+    state: enabled
+    immediate: true
+  when: firewall_ssh_allow_ips is not defined or firewall_ssh_allow_ips | length == 0
+
+- name: Open HTTP, HTTPS, HAProxy stats
+  ansible.posix.firewalld:
+    port: "{{ item }}"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop:
+    - 80/tcp
+    - 443/tcp
+    - 8404/tcp
+
+- name: Remove default dhcp-client service (if present)
+  ansible.posix.firewalld:
+    service: dhcpv6-client
+    permanent: true
+    state: disabled
+    immediate: true

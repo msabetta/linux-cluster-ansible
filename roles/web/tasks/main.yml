@@ -1,0 +1,23 @@
+---
+- name: Install Apache and PHP
+  ansible.builtin.yum:
+    name:
+      - httpd
+      - mod_ssl
+      - php
+      - php-mysqlnd
+    state: present
+
+- name: Deploy index.php for testing
+  ansible.builtin.template:
+    src: index.php.j2
+    dest: /var/www/html/index.php
+    owner: apache
+    group: apache
+    mode: '0644'
+
+- name: Ensure Apache is started and enabled
+  ansible.builtin.systemd:
+    name: httpd
+    state: started
+    enabled: true

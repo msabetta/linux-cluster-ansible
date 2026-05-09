@@ -1,0 +1,33 @@
+- name: Ensure SELinux is enforcing
+  ansible.posix.selinux:
+    policy: targeted
+    state: enforcing
+  register: selinux_status
+  notify: Reboot if SELinux mode changed
+
+- name: Install SELinux management tools
+  ansible.builtin.yum:
+    name: policycoreutils-python-utils
+    state: present
+
+- name: Allow HAProxy to bind to non-standard ports
+  community.general.seport:
+    ports: "{{ haproxy_frontend_port }},{{ haproxy_stats_port }}"
+    proto: tcp
+    setype: http_port_t
+    state: present
+  when: "'loadbalancers' in group_names"
+
+- name: Allow HAProxy to connect to any port
+  ansible.posix.seboolean:
+    name: haproxy_connect_any
+    state: true
+    persistent: true
+  when: "'loadbalancers' in group_names"
+
+- name: Allow Apache to make network connections
+  ansible.posix.seboolean:
+    name: httpd_can_network_connect
+    state: true
+    persistent: true
+  when: "'app_servers' in group_names"

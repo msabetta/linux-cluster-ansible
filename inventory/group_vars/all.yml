@@ -1,0 +1,49 @@
+# Common Variables
+ansible_user: ansible
+ansible_user_password: "{{ vault_ansible_password }}"
+
+# Privilege escalation
+ansible_become: true
+
+# Network Variables
+dns_servers:
+  - 8.8.8.8
+  - 1.1.1.1
+
+# NTP Variables
+ntp_servers:
+  - 0.pool.ntp.org
+  - 1.pool.ntp.org
+
+# Base packages variables
+base_packages:
+  - vim
+  - curl
+  - wget
+  - net-tools
+  - chrony
+  - policycoreutils-python-utils
+  - libsemanage-python3
+  - semanage-gui
+  - htop
+  - unzip
+  - git
+  - openssh-clients
+  - make
+  - python3-dnf
+  - python3-pip
+  - python3-setuptools
+  - python3-wheel
+  - python3-virtualenv
+  - python3-passlib
+  - python3-ldap
+  - python3-devel
+  - python3-crypto
+  - python3-cryptography
+  - python3-cryptodomex
+  - python3-pycryptodomex
+# SSH Configuration
+ssh_port: 2222
+
+# Monitoring Configuration
+monitoring_group: monitoring_servers

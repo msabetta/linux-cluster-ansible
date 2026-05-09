@@ -1,0 +1,36 @@
+---
+- name: Restart journald
+  ansible.builtin.systemd:
+    name: systemd-journald
+    state: restarted
+    daemon_reload: true
+
+- name: Restart Prometheus Agent
+  ansible.builtin.systemd:
+    name: prometheus
+    state: restarted
+    daemon_reload: true
+
+- name: Restart Alertmanager
+  ansible.builtin.systemd:
+    name: alertmanager
+    state: restarted
+    daemon_reload: true
+
+- name: Restart Metrics Server
+  ansible.builtin.systemd:
+    name: metrics-server
+    state: restarted
+    daemon_reload: true
+
+- name: Restart all monitoring services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: restarted
+    daemon_reload: true
+  loop:
+    - node_exporter
+    - prometheus
+    - alertmanager
+    - metrics-server
+  when: item in ansible_facts.services

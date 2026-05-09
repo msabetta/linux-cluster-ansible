@@ -1,0 +1,43 @@
+# Common
+journald_retention_days: 30
+journald_max_size: 500M
+
+# Auth
+auth_realm: TECNOLOGICODECREMONA.LOCAL
+auth_domain_name: tecnologicodecremona.local
+auth_ad_user: administrator
+auth_ad_pass: "{{ vault_ad_password }}"
+auth_ldap_server: dc1.tecnologicodecremona.local
+auth_krb5_kdc: dc1.tecnologicodecremona.local
+auth_krb5_admin_server: dc1.tecnologicodecremona.local
+
+# Firewall
+firewall_ssh_allow_ips:
+  - "{{ ansible_default_ipv4.address }}"
+  - "[IP_ADDRESS]"
+
+# SSH
+firewall_ssh_port: 2222
+
+# Node exporter
+monitoring_node_exporter_port: 9100
+
+# Prometheus
+monitoring_prometheus_port: 9090
+
+# Alertmanager
+monitoring_alertmanager_port: 9093
+
+# Grafana
+monitoring_grafana_port: 3000 
+
+# Web Server
+web_server_port: 80 
+web_server_ssl_port: 443 
+
+# Database Server
+mariadb_port: 3306 
+
+# HAProxy
+haproxy_frontend_port: 443 
+haproxy_stats_port: 8404 

@@ -1,0 +1,68 @@
+- name: Install HAProxy
+  ansible.builtin.yum:
+    name: haproxy
+    state: present
+
+- name: Deploy HAProxy configuration
+  ansible.builtin.template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: '0640'
+    validate: haproxy -c -f %s
+  notify: Restart HAProxy
+
+- name: Enable and start HAProxy
+  ansible.builtin.systemd:
+    name: haproxy
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: Configure log rotation
+  ansible.builtin.copy:
+    content: |
+      /var/log/haproxy/*.log {
+          daily
+          rotate 14
+          compress
+          delaycompress
+          missingok
+          notifempty
+          postrotate
+              /bin/systemctl reload haproxy > /dev/null 2>&1 || true
+          endscript
+      }
+    dest: /etc/logrotate.d/haproxy
+
+- name: Create HAProxy certs directory
+  ansible.builtin.file:
+    path: /etc/haproxy/certs
+    state: directory
+    owner: root
+    group: root
+    mode: '0750'
+
+- name: Deploy SSL certificate
+  ansible.builtin.copy:
+    src: ssl/cert.pem
+    dest: /etc/pki/tls/certs/haproxy.pem
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Deploy private key
+  ansible.builtin.copy:
+    src: ssl/private.key
+    dest: /etc/ssl/private/haproxy.key
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Combine certificate and key for HAProxy
+  ansible.builtin.shell: |
+    cat /etc/pki/tls/certs/haproxy.pem /etc/ssl/private/haproxy.key > /etc/haproxy/certs/combined.pem
+  notify: Restart HAProxy
+  changed_when: true
+

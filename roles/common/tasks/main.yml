@@ -1,0 +1,25 @@
+---
+- name: Install base packages
+  ansible.builtin.yum:
+    name: "{{ base_packages }}"
+    state: present
+
+- name: Deploy chrony configuration
+  ansible.builtin.template:
+    src: chrony.conf.j2
+    dest: /etc/chrony.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart chronyd
+
+- name: Ensure chronyd is started and enabled
+  ansible.builtin.systemd:
+    name: chronyd
+    state: started
+    enabled: true
+  notify: Restart chronyd
+
+- name: Set timezone to Europe/Rome
+  community.general.timezone:
+    name: Europe/Rome

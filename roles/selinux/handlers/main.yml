@@ -1,0 +1,50 @@
+- name: Reboot if SELinux mode changed
+  ansible.builtin.reboot:
+    msg: "Rebooting for SELinux policy change"
+    connect_timeout: 5
+    reboot_timeout: 300
+  when: selinux_status.reboot_required
+
+- name: Install policycoreutils-python-utils if needed
+  ansible.builtin.yum:
+    name: policycoreutils-python-utils
+    state: present
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Rocky'
+
+- name: Install policycoreutils-python-utils (Debian)
+  ansible.builtin.apt:
+    name: policycoreutils-python-utils
+    state: present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Restore SELinux boolean
+  community.general.sefcontext:
+    target: "{{ item.target }}"
+    setype: "{{ item.setype }}"
+    state: "{{ item.state }}"
+  loop:
+    - { target: "/var/www/html(/.*)?\\.html", setype: "httpd_sys_content_t", state: "file" }
+    - { target: "/var/www/html(/.*)?\\.(php|cgi|pl|py)", setype: "httpd_sys_script_exec_t", state: "file" }
+    - { target: "/var/lib/php/sessions(/.*)?", setype: "httpd_sys_rw_content_t", state: "file" }
+    - { target: "/var/log/httpd(/.*)?", setype: "httpd_log_t", state: "file" }
+  notify: semanage fcontext -a -t httpd_sys_content_t \"/var/www/html(/.*)?\\.html\" 
+
+- name: Restore file contexts
+  ansible.builtin.command: "/usr/sbin/restorecon -Rv {{ item }}"
+  loop:
+    - /var/www/html
+    - /var/lib/php/sessions
+    - /var/log/httpd
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Rocky'
+
+- name: Apply new SELinux policies
+  ansible.builtin.command: /usr/sbin/semanage fcontext -a -t httpd_sys_content_t "/var/www/html(/.*)?\.html"
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Rocky'
+
+- name: Apply new SELinux policies (Debian)
+  ansible.builtin.command: /usr/sbin/semanage fcontext -a -t httpd_sys_content_t "/var/www/html(/.*)?\.html"
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: semanage fcontext -a -t httpd_sys_content_t "/var/www/html(/.*)?\.html"
+  ansible.builtin.command: /usr/sbin/semanage fcontext -a -t httpd_sys_content_t "/var/www/html(/.*)?\.html"
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Rocky' 

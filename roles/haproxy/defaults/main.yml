@@ -1,0 +1,9 @@
+---
+haproxy_frontend_port: 443
+haproxy_stats_port: 8404
+haproxy_stats_password: admin
+haproxy_backends:
+  web:
+    balance: roundrobin
+    health_check: httpchk
+    servers: []

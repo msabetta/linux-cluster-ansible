@@ -1,0 +1,8 @@
+---
+- name: Setup NFS Gateway Server
+  hosts: nfs_servers
+  become: true
+  roles:
+    - role: nfs_server
+  tags:
+    - nfs

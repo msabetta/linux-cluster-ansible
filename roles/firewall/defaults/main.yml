@@ -1,0 +1,16 @@
+---
+firewall_allowed_ports:
+  - 22/tcp
+  - 80/tcp
+  - 443/tcp
+  - 8404/tcp
+  - 88/tcp
+  - 88/udp
+  - 389/tcp
+  - 389/udp
+  - 636/tcp
+  - 445/tcp
+  - 464/tcp
+  - 464/udp
+
+firewall_zone: public

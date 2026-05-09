@@ -1,0 +1,13 @@
+[mysqld]
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+log-error=/var/log/mariadb/mariadb.log
+pid-file=/run/mariadb/mariadb.pid
+
+# Cluster Optimization
+max_connections = 200
+query_cache_size = 16M
+innodb_buffer_pool_size = 256M
+
+[client]
+socket=/var/lib/mysql/mysql.sock

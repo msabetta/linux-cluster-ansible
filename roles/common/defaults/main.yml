@@ -1,0 +1,13 @@
+---
+base_packages:
+  - vim
+  - curl
+  - wget
+  - net-tools
+  - chrony
+  - policycoreutils-python-utils
+  - libsemanage-python3
+  - semanage-gui
+
+common_timezone: Europe/Rome
+common_ntp_enabled: true

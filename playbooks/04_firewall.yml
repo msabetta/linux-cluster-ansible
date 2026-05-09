@@ -1,0 +1,20 @@
+---
+- name: Configurazione Firewall
+  hosts: all
+  become: true
+  gather_facts: true # È buona pratica raccogliere fatti per playbook più complessi
+
+  vars:
+    # Meglio definire gli IP in una lista YAML per una maggiore leggibilità e gestibilità
+    firewall_ssh_allow_ips:
+      - "192.168.1.10"
+      - "10.0.0.5"
+      - "172.16.0.20"
+    # La porta SSH dovrebbe essere un numero intero, non una stringa
+    firewall_ssh_port: 2222
+
+  roles:
+    - firewall # Specificare esplicitamente il nome del ruolo
+
+  tags:
+    - firewall

@@ -1,0 +1,73 @@
+---
+- name: Ensure ssh-keys directory exists on control node
+  ansible.builtin.file:
+    path: "{{ role_path }}/files/ssh-keys"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+- name: Ensure SSH key pair exists for Ansible on control node
+  ansible.builtin.openssh_keypair:
+    path: "{{ role_path }}/files/ssh-keys/ansible_ed25519"
+    type: ed25519
+    state: present
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+- name: Harden SSH configuration
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+    validate: sshd -t -f %s
+  loop:
+    - { regexp: "^#?Port ", line: "Port {{ ssh_port }}" }
+    - { regexp: "^#?PermitRootLogin ", line: "PermitRootLogin no" }
+    - { regexp: "^#?PasswordAuthentication ", line: "PasswordAuthentication no" }
+    - { regexp: "^#?PubkeyAuthentication ", line: "PubkeyAuthentication yes" }
+    - { regexp: "^#?MaxAuthTries ", line: "MaxAuthTries 3" }
+    - { regexp: "^#?AllowGroups ", line: "AllowGroups sshusers ansible" }
+  notify: Restart SSHD
+
+- name: Deploy authorized SSH keys
+  ansible.posix.authorized_key:
+    user: "{{ ansible_user }}"
+    key: "{{ lookup('file', item) }}"
+    exclusive: true
+  loop: "{{ lookup('fileglob', 'ssh-keys/*.pub', wantlist=true) }}"
+
+- name: Create sshusers group if not exists
+  ansible.builtin.group:
+    name: sshusers
+    state: present
+    system: yes
+
+- name: Create ansible user with SSH key (if not exists)
+  ansible.builtin.user:
+    name: ansible
+    comment: "Ansible Automation User"
+    shell: /bin/bash
+    groups: sshusers
+    append: yes
+    state: present
+  when: ansible_user != 'root'
+
+- name: Generate SSH key for ansible user on managed nodes
+  ansible.builtin.user:
+    name: ansible
+    generate_ssh_key: yes
+    ssh_key_type: ed25519
+    ssh_key_bits: 256
+    ssh_key_file: .ssh/id_ed25519
+  when: ansible_user != 'root'
+
+- name: Deploy Ansible user authorized key
+  ansible.posix.authorized_key:
+    user: ansible
+    key: "{{ lookup('file', 'ssh-keys/ansible_ed25519.pub') }}"
+    state: present
+

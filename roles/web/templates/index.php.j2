@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cluster Node: {{ inventory_hostname }}</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+        .node-info { background: #f4f4f4; padding: 20px; border-radius: 10px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="node-info">
+        <h1>Welcome to {{ inventory_hostname }}</h1>
+        <p>IP Address: {{ ansible_default_ipv4.address }}</p>
+        <p>Server Time: {{ ansible_date_time.iso8601 }}</p>
+        <hr>
+        <?php
+            $conn = new mysqli("{{ db_host | default('localhost') }}", "root", "{{ vault_mysql_root_password | default('') }}");
+            if ($conn->connect_error) {
+                echo "<p style='color:red'>Database Connection Failed: " . $conn->connect_error . "</p>";
+            } else {
+                echo "<p style='color:green'>Database Connection Successful!</p>";
+            }
+        ?>
+    </div>
+    <br><br>
+    <?php phpinfo(); ?>
+</body>
+</html>

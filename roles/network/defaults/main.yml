@@ -1,0 +1,6 @@
+---
+network_interface: eth0
+network_method: manual
+network_dns_servers:
+  - 8.8.8.8
+  - 1.1.1.1

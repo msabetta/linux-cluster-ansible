@@ -1,0 +1,22 @@
+---
+auth_domain_name: esecure.es
+auth_realm: ESECURE.ES
+auth_ad_user: administrator
+auth_ad_pass: "{{ vault_ad_password | default('password') }}"
+auth_ldap_server: ldap.esecure.es
+auth_ldap_base_dn: "dc=esecure,dc=es"
+
+auth_packages:
+  - sssd
+  - realmd
+  - adcli
+  - krb5-workstation
+  - oddjob
+  - oddjob-mkhomedir
+  - samba-common-tools
+
+auth_krb5_kdc: "kdc.esecure.es"
+auth_krb5_admin_server: "kdc.esecure.es"
+
+auth_sssd_config_path: /etc/sssd/sssd.conf
+auth_krb5_config_path: /etc/krb5.conf

@@ -1,0 +1,81 @@
+- name: Install Node Exporter
+  ansible.builtin.yum:
+    name: prometheus-node-exporter
+    state: present
+
+- name: Start Node Exporter
+  ansible.builtin.systemd:
+    name: node_exporter
+    state: started
+    enabled: true
+
+- name: Configure journald for persistent logs
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/journald.conf
+    regexp: "^#?Storage="
+    line: "Storage=persistent"
+  notify: Restart journald
+
+- name: Ensure rsyslog is active
+  ansible.builtin.systemd:
+    name: rsyslog
+    state: started
+    enabled: true
+
+- name: Install Prometheus Agent (Prometheus + Alertmanager)
+  ansible.builtin.yum:
+    name: prometheus
+    state: present
+  notify: Restart Prometheus Agent
+  when: "monitoring_group in group_names"
+
+- name: Deploy Prometheus configuration
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: root
+    group: root
+    mode: '0640'
+  notify: Restart Prometheus Agent
+  when: "monitoring_group in group_names"
+
+- name: Ensure Prometheus Agent is enabled and started
+  ansible.builtin.systemd:
+    name: prometheus
+    state: started
+    enabled: true
+    daemon_reload: true
+  when: "monitoring_group in group_names"
+
+- name: Deploy Alertmanager configuration
+  ansible.builtin.template:
+    src: alertmanager.yml.j2
+    dest: /etc/prometheus/alertmanager.yml
+    owner: root
+    group: root
+    mode: '0640'
+  notify: Restart Alertmanager
+  when: "monitoring_group in group_names"
+
+- name: Ensure Alertmanager is enabled and started
+  ansible.builtin.systemd:
+    name: alertmanager
+    state: started
+    enabled: true
+    daemon_reload: true
+  when: "monitoring_group in group_names"
+
+- name: Install HPA requirements
+  ansible.builtin.yum:
+    name: metrics-server
+    state: present
+  notify: Restart Metrics Server
+  when: "monitoring_group in group_names"
+
+- name: Ensure Metrics Server is enabled and started
+  ansible.builtin.systemd:
+    name: metrics-server
+    state: started
+    enabled: true
+    daemon_reload: true
+  when: "monitoring_group in group_names"

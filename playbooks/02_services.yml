@@ -1,0 +1,36 @@
+---
+- name: Aggiornamento dei Load Balancer (HAProxy)
+  hosts: loadbalancers
+  become: true
+  gather_facts: true
+  serial: 1                # Esegue il playbook su un host alla volta per rolling update
+  max_fail_percentage: 0   # Interrompe l'esecuzione se un host fallisce
+  roles:
+    - role: haproxy        # Assicurati che il ruolo 'haproxy' esista
+  tags:
+    - services            # Tag per eseguire solo questo playbook specifico
+    - infrastructure      # Un tag più generico per includere tutti i playbook
+
+- name: Aggiornamento dei Web Server
+  hosts: app_servers
+  become: true
+  gather_facts: true
+  roles:
+    - role: web            # Assicurati che il ruolo 'web' esista
+    - role: monitoring     # Assicurati che il ruolo 'monitoring' esista
+  tags:
+    - app                 # Tag per eseguire solo questo playbook specifico
+    - services            # Potrebbe essere utile un tag condiviso
+    - infrastructure
+
+- name: Aggiornamento dei Database Server (MariaDB)
+  hosts: db_servers
+  become: true
+  gather_facts: true
+  roles:
+    - role: mariadb        # Assicurati che il ruolo 'mariadb' esista
+    - role: monitoring     # Assicurati che il ruolo 'monitoring' esista
+  tags:
+    - database            # Tag per eseguire solo questo playbook specifico
+    - services            # Potrebbe essere utile un tag condiviso
+    - infrastructure

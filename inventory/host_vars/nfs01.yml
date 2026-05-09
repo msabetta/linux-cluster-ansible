@@ -1,0 +1,14 @@
+nfs_exports:
+  - path: /data/shared
+    options: "192.168.1.0/24(rw,sync,no_root_squash)"
+    clients:
+      - app01
+      - app02
+      - db01
+      - db02
+      - lb01
+      - lb02
+      - nfs01
+      - nfs02
+      - nfs03
+      - nfs04

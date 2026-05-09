@@ -1,0 +1,31 @@
+- name: Install NetworkManager
+  ansible.builtin.yum:
+    name: NetworkManager
+    state: present
+
+- name: Configure static interface
+  community.general.nmcli:
+    conn_name: "{{ ansible_default_ipv4.interface }}"
+    ifname: "{{ ansible_default_ipv4.interface }}"
+    type: ethernet
+    ip4: "{{ ansible_default_ipv4.address }}/24"
+    gw4: "{{ ansible_default_ipv4.gateway }}"
+    dns4: "{{ dns_servers | join(',') }}"
+    state: present
+    method: manual
+  notify: Restart NetworkManager
+  when: ansible_default_ipv4.interface is defined
+
+- name: Disable IPv6
+  community.general.nmcli:
+    conn_name: "{{ ansible_default_ipv4.interface }}"
+    type: ethernet
+    state: present
+    method: manual
+    ip6: ignore
+  notify: Restart NetworkManager
+  when: ansible_default_ipv4.interface is defined
+
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"

@@ -1,0 +1,29 @@
+---
+- name: Install MariaDB
+  ansible.builtin.yum:
+    name:
+      - mariadb-server
+      - python3-mysql  # Updated for Python 3
+    state: present
+
+- name: Deploy MariaDB configuration
+  ansible.builtin.template:
+    src: my.cnf.j2
+    dest: /etc/my.cnf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart mariadb
+
+- name: Ensure MariaDB is started and enabled
+  ansible.builtin.systemd:
+    name: mariadb
+    state: started
+    enabled: true
+
+- name: Configure root password
+  community.mysql.mysql_user:
+    name: root
+    password: "{{ vault_mysql_root_password }}"
+    login_unix_socket: /var/lib/mysql/mysql.sock
+    state: present

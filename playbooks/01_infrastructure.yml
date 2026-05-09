@@ -1,0 +1,19 @@
+---
+- name: Setup di base dell'infrastruttura
+  hosts: all
+  become: true
+  gather_facts: true # Raccoglie informazioni sui sistemi remoti, utile per molti ruoli
+
+  # Definizione dell'ordine di esecuzione dei ruoli
+  # L'ordine è importante: common prima, poi network, ecc.
+  roles:
+    - role: common # Ruolo per configurazioni comuni a tutti i sistemi
+    - role: network # Ruolo per configurazioni di rete
+    - role: firewall # Ruolo per la configurazione del firewall
+    - role: selinux # Ruolo per la gestione di SELinux
+    - role: ssh # Ruolo per la configurazione del servizio SSH
+    - role: auth # Ruolo per la gestione dell'autenticazione (es. utenti, gruppi, sudo)
+
+  # Tag per eseguire solo un sottoinsieme di compiti o ruoli
+  tags:
+    - infrastructure # Questo tag verrà applicato all'intero playbook (o ai ruoli se specificato diversamente)

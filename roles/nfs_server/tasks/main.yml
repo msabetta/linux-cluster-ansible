@@ -1,0 +1,48 @@
+---
+- name: Install NFS utilities
+  ansible.builtin.yum:
+    name: nfs-utils
+    state: present
+
+- name: Create export directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop: "{{ nfs_exports }}"
+
+- name: Deploy NFS exports configuration
+  ansible.builtin.template:
+    src: exports.j2
+    dest: /etc/exports
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload exports
+
+- name: Ensure RPCbind is started and enabled
+  ansible.builtin.systemd:
+    name: rpcbind
+    state: started
+    enabled: true
+
+- name: Ensure NFS server is started and enabled
+  ansible.builtin.systemd:
+    name: nfs-server
+    state: started
+    enabled: true
+
+- name: Allow NFS through firewall
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop:
+    - nfs
+    - mountd
+    - rpc-bind
+  when: ansible_facts.services['firewalld.service'] is defined and ansible_facts.services['firewalld.service'].state == 'running'
+  ignore_errors: true # In case firewalld is not active or managed elsewhere
